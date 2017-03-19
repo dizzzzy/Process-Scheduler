@@ -4,15 +4,22 @@ class Process:
         self.arrival_time = (float(arrival_time) / 1000)
         self.burst_time = (float(burst_time) / 1000)
         self.priority = priority if 1 < priority < 140 else exit()
-
-    def get_process(self):
-        return self
+        self.time_slot = 1
 
     def get_arrival_time(self):
         return self.arrival_time
 
     def get_burst_time(self):
         return self.burst_time
+
+    def update_priority(self, priority):
+        if priority < 100:
+            self.time_slot = float((140 - priority) * 0.02)  # In Milliseconds
+        else:
+            self.time_slot = float((140 - priority) * 0.005)  # In Milliseconds
+
+    def get_timeslot(self):
+        return self.time_slot
 
     def get_priority(self):
         return self.priority

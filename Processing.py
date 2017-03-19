@@ -25,5 +25,8 @@ class ProcessThread(threading.Thread):
             print "No Processing left! Exiting!!!"
             exit(0)
 
-        print "Process ran for %s seconds" % active_queue.get_all_process()[0].get_burst_time()
-        time.sleep(active_queue.get_all_process()[0].get_burst_time())  # Run P1 for desired time
+        print "Process granted %s second" % active_queue.get_all_process()[0].get_timeslot()
+        time.sleep(active_queue.get_all_process()[0].get_timeslot())  # Run P1 for desired time slot
+
+        # active_queue.get_all_process()[0].update_priority(active_queue.get_all_process()[0].get_priority())
+        print active_queue.get_all_process()[0].get_timeslot()
