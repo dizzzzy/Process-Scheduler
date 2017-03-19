@@ -1,8 +1,8 @@
-class main_process:
+class Process:
     def __init__(self, pid, arrival_time, burst_time, priority):
         self.pid = pid
-        self.arrival_time = arrival_time
-        self.burst_time = burst_time
+        self.arrival_time = (float(arrival_time) / 1000)
+        self.burst_time = (float(burst_time) / 1000)
         self.priority = priority if 1 < priority < 140 else exit()
 
     def get_process(self):
@@ -22,10 +22,3 @@ class main_process:
 
     def get_process_from_pid(self, pid):
         return self if self.pid == pid else None
-
-process_list = []
-with open("input.txt") as f:
-    for processes in f.readlines()[2:]:
-        process = processes.split(" ")
-        process_name = main_process(process[3], process[1], process[2], int(process[3]))
-        process_list.append(process_name)

@@ -1,9 +1,11 @@
 import threading
-
 import time
 
+from Processing import ProcessThread
+from Queue import process_list
 
-class scheduler_thread(threading.Thread):
+
+class SchedulerThread(threading.Thread):
     """
     Main Scheduler thread: Priority based scheduler
     1. Can pause/resume child processes
@@ -11,12 +13,14 @@ class scheduler_thread(threading.Thread):
     Each process is responsible to keep track of its total execution and inform the scheduler thread when it is
     finished. This process continues until all processes are done.
     Active/Expired Queue will contain the PID's of the processes.
+    Default time slot is 0.
     """
 
     def __init__(self):
-        super(scheduler_thread, self).__init__()
+        super(SchedulerThread, self).__init__()
         self.paused = False
         self.pause_cond = threading.Condition(threading.Lock())
+        self.time_slot = 0
 
     def pause(self):
         """
@@ -24,33 +28,21 @@ class scheduler_thread(threading.Thread):
         """
         self.paused = True
         self.pause_cond.acquire()
-        time.sleep(10)
 
     def resume(self):
         """
         Allows the paused child process in the expired queue to run again
         """
         self.paused = False
-        self.pause_cond.notify()
         self.pause_cond.release()
 
+    def update_priority(self, priority):
+        if priority < 100:
+            self.time_slot = (140 - priority) * 0.02  # In Milliseconds
+        else:
+            self.time_slot = (140 - priority) * 0.005  # In Milliseconds
+
     def run(self):
-        print "Hello"
-        process_thread = threading.Thread(main())
+        time.sleep(1)  # Runs after 1 second
+        process_thread = ProcessThread(process_list)
         process_thread.run()
-        # while True:
-        #     with self.pause_cond:
-        #         while self.paused:
-        #             self.pause_cond.wait()
-        #         print 'do the thing'
-        #     time.sleep(5)
-
-
-def main():
-    print "Hello"
-    time.sleep(10)
-    print "Nitesh"
-
-
-main_scheduler_thread = scheduler_thread()
-main_scheduler_thread.run()
