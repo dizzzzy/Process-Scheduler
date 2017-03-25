@@ -8,8 +8,8 @@ class Queue:
     def is_empty(self):
         return self.items == []
 
-    def enqueue_process(self, item):
-        self.items.insert(0, item)
+    def enqueue_process(self, index, item):
+        return self.items.insert(index, item)
 
     def de_queue(self):
         return self.items.pop()
