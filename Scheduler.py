@@ -9,8 +9,10 @@ from timeit import default_timer
 class SchedulerThread(threading.Thread):
     """
     Main Scheduler thread: Priority based scheduler
-    1. Can pause/resume child processes
-    2. Allows uni-processing scheduling
+    1. Can pause/resume processes
+    2. Switch between the active and expired queue
+    3. Updates the priority of the processes if they run twice
+    4. Give time slots to the processes\
     Each process is responsible to keep track of its total execution and inform the scheduler thread when it is
     finished. This process continues until all processes are done.
     Active/Expired Queue will contain the PID's of the processes.
@@ -44,20 +46,29 @@ class SchedulerThread(threading.Thread):
         while True:
             elapsed_time = default_timer() - self.start_time
             if int(elapsed_time) == 1 and not st:  # Start the thread at 1 second
-                print "Starting process"
+                print "Starting process, Time: ", int(default_timer() - self.start_time), "Second"
                 process_thread.start()
                 st = True
-            if int(elapsed_time) == 3:
-                print "Pausing process P1"
+            elif int(elapsed_time) > 1:
+                print "Pausing process P1, Time: ", int(default_timer() - self.start_time), "Seconds"
                 process_thread.pause()
-                print "P1 paused"
-                print "Starting P2"
+                print "P1 paused, Time: ", int(default_timer() - self.start_time), "Seconds"
+                print "Starting P2, Time: ", int(default_timer() - self.start_time), "Seconds"
                 process_thread_2.start()
-                time.sleep(5)
-                process_thread_2.join()
-                print "Finished P2"
-                print "P1 resumed"
+                time.sleep(2)
+                process_thread_2.pause()
+                print "Pausing Process P2, Time: ", int(default_timer() - self.start_time), "Seconds"
                 process_thread.resume()
+                time.sleep(3)
+                process_thread.pause()
+                print "Resuming Process P2, Time: ", int(default_timer() - self.start_time), "Seconds"
+                process_thread_2.resume()
+                process_thread_2.join()
+                print "Finished P2, Time: ", int(default_timer() - self.start_time), "Seconds"
+                print "P1 resumed, Time: ", int(default_timer() - self.start_time), "Seconds"
+                process_thread.resume()
+                process_thread.join()
+                print "Finished at ", int(default_timer() - self.start_time), "Seconds"
                 break
             else:
                 time.sleep(1)
