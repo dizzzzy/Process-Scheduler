@@ -1,9 +1,10 @@
 class Process:
-    def __init__(self, pid, arrival_time, burst_time, priority):
+    def __init__(self, pid, arrival_time, burst_time, priority, name):
         self.pid = pid
         self.arrival_time = (float(arrival_time) / 1000)
         self.burst_time = (float(burst_time) / 1000)
         self.priority = priority if 1 < priority < 140 else exit()
+        self.name = name
         self.time_slot = 1
 
     def get_arrival_time(self):
@@ -11,6 +12,9 @@ class Process:
 
     def get_burst_time(self):
         return self.burst_time
+
+    def update_burst_time(self, time):
+        return self.burst_time - time
 
     def update_priority(self, priority):
         if priority < 100:
@@ -26,6 +30,9 @@ class Process:
 
     def get_pid(self):
         return self.pid
+
+    def get_name(self):
+        return self.name
 
     def get_process_from_pid(self, pid):
         return self if self.pid == pid else None

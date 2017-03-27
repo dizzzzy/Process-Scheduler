@@ -2,20 +2,29 @@ import threading
 
 import time
 
+from Process import Process
+from Processing import ProcessThread
 from Queue import Queue
 
-from Processing import ProcessThread
 from timeit import default_timer
 
 Q1 = Queue()
 Q2 = Queue()
+
+p_list = []
+with open("input.txt") as f:
+    process_list = f.readlines()[2:]
+    for index, process in enumerate(process_list):
+        process_sub_items = process.split(" ")
+        p_list.append(Process(int(index + 1), process_sub_items[1], process_sub_items[2], int(process_sub_items[3]),
+                              process_sub_items[0]))
 
 
 class SchedulerThread(threading.Thread):
     """
         Main Scheduler thread: Priority based scheduler
         1. Can pause/resume processes - Done
-        2. Switch between the active and expired queue
+        2. Switch between the active and expired queue - Done
         3. Updates the priority of the processes if they run twice
         4. Give time slots to the processes
         Each process is responsible to keep track of its total execution and inform the scheduler thread when it is
@@ -28,92 +37,35 @@ class SchedulerThread(threading.Thread):
         self.paused = False
         self.pause_cond = threading.Condition(threading.Lock())
         self.start_time = default_timer()
-        with open("input.txt") as f:
-            process_list = f.readlines()[2:]
-        self.process_list = process_list
-        self.active_queue = Q1
+
+        self.process_list = p_list
+        self.active_queue = Q1  # At starting, Q1 is active queue and Q2 is expired queue
         self.expired_queue = Q2
+        self.timeslot = 1
 
-    def pause(self):
-        """
-        Allows the current child process to pause until resumed is called
-        """
-        self.paused = True
-        self.pause_cond.acquire()
-
-    def resume(self):
-        """
-        Allows the paused child process in the expired queue to run again
-        """
-        self.paused = False
-        self.pause_cond.release()
+    def switch(self):
+        if self.active_queue.size() == 0 and self.expired_queue.size() != 0:
+            self.active_queue, self.expired_queue = self.expired_queue, self.active_queue
 
     def run(self):
-        process_thread_1 = ProcessThread(self.process_list, "P1")
-        process_thread_2 = ProcessThread(self.process_list, "P2")
-        process_thread_3 = ProcessThread(self.process_list, "P3")
+        process_thread_1 = ProcessThread(self.process_list[0])
+        process_thread_2 = ProcessThread(self.process_list[1])
+        process_thread_3 = ProcessThread(self.process_list[2])
 
-        st = False
-        while True:
-            elapsed_time = default_timer() - self.start_time
-            if int(elapsed_time) == 1 and not st:  # Start the thread at 1 second
-                process_thread_1.start()
-                print "P1 given 2500, Time: ", int(default_timer() - self.start_time), "Seconds"
-                process_thread_1.pause()
-                time.sleep(2.5)
+        flag = True
+        start_time = default_timer()
+        while True and flag:
+            if int(default_timer() == self.timeslot):
+                self.expired_queue.enqueue_process(0, process_thread_1)
+                self.switch()
 
-                process_thread_2.start()
-                print "P2 given 100, Time: ", int(default_timer() - self.start_time), "Seconds"
-                process_thread_2.pause()
-                time.sleep(0.1)
+                if process_thread_1.process.get_burst_time() > self.timeslot:
+                    process_thread_1.start()
+                    if int(default_timer() == 2):
 
-                process_thread_3.start()
-                print "P3 given 100, Time: ", int(default_timer() - self.start_time), "Seconds"
-                process_thread_3.pause()
-                time.sleep(0.1)
+                        process_thread_1.pause()
+                        process_thread_1.process.update_burst_time(self.timeslot)
 
-                process_thread_1.resume()
-                process_thread_1.join()
-                process_thread_2.resume()
-                process_thread_2.join()
-                process_thread_3.resume()
-                process_thread_3.join()
-                print "Total Time: ", int(default_timer() - self.start_time), "Seconds"
-                st = True
-                break
-            elif int(elapsed_time) > 1:
-                print None
-
-
-
-        # st = False
-        # while True:
-        #     elapsed_time = default_timer() - self.start_time
-        #     if int(elapsed_time) == 1 and not st:  # Start the thread at 1 second
-        #         print "Starting process, Time: ", int(default_timer() - self.start_time), "Second"
-        #         process_thread.start()
-        #         st = True
-        #     elif int(elapsed_time) > 1:
-        #         print "Pausing process P1, Time: ", int(default_timer() - self.start_time), "Seconds"
-        #         process_thread.pause()
-        #         print "P1 paused, Time: ", int(default_timer() - self.start_time), "Seconds"
-        #         print "Starting P2, Time: ", int(default_timer() - self.start_time), "Seconds"
-        #         process_thread_2.start()
-        #         time.sleep(2)
-        #         process_thread_2.pause()
-        #         print "Pausing Process P2, Time: ", int(default_timer() - self.start_time), "Seconds"
-        #         process_thread.resume()
-        #         time.sleep(3)
-        #         process_thread.pause()
-        #         print "Resuming Process P2, Time: ", int(default_timer() - self.start_time), "Seconds"
-        #         process_thread_2.resume()
-        #         process_thread_2.join()
-        #         print "Finished P2, Time: ", int(default_timer() - self.start_time), "Seconds"
-        #         print "P1 resumed, Time: ", int(default_timer() - self.start_time), "Seconds"
-        #         process_thread.resume()
-        #         process_thread.join()
-        #         print "Finished at ", int(default_timer() - self.start_time), "Seconds"
-        #         break
-        #     else:
-        #         time.sleep(1)
-        #         pass
+                        self.active_queue.de_queue(process_thread_1)
+                        self.expired_queue.enqueue_process(0, process_thread_1)
+                flag = False
