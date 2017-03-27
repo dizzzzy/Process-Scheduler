@@ -1,3 +1,6 @@
+from math import ceil
+
+
 class Process:
     def __init__(self, pid, arrival_time, burst_time, priority, name):
         self.pid = pid
@@ -24,6 +27,10 @@ class Process:
 
     def get_timeslot(self):
         return self.time_slot
+
+    def update_priority(self, waiting_time, time_now, arrival_time):
+        bonus = ceil(10 * waiting_time / (time_now - arrival_time))
+        self.priority = max(100, min(self.get_priority() - bonus + 5, 139))
 
     def get_priority(self):
         return self.priority

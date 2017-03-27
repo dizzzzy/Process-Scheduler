@@ -54,18 +54,21 @@ class SchedulerThread(threading.Thread):
 
         flag = True
         start_time = default_timer()
+
         while True and flag:
-            if int(default_timer() == self.timeslot):
+            if int(default_timer() == 1):  # Start at time 1 second
                 self.expired_queue.enqueue_process(0, process_thread_1)
                 self.switch()
 
                 if process_thread_1.process.get_burst_time() > self.timeslot:
                     process_thread_1.start()
-                    if int(default_timer() == 2):
+                    while default_timer():
+                        if int(default_timer()) == 2:
+                            print int(default_timer())
+                            process_thread_1.pause()
+                            process_thread_1.process.update_burst_time(self.timeslot)
 
-                        process_thread_1.pause()
-                        process_thread_1.process.update_burst_time(self.timeslot)
+                            self.active_queue.de_queue(process_thread_1)
+                            self.expired_queue.enqueue_process(0, process_thread_1)
 
-                        self.active_queue.de_queue(process_thread_1)
-                        self.expired_queue.enqueue_process(0, process_thread_1)
                 flag = False
