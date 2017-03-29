@@ -8,7 +8,8 @@ class Process:
         self.burst_time = (float(burst_time) / 1000)
         self.priority = priority if 1 < priority < 140 else exit()
         self.name = name
-        self.time_slot = 1
+        self.has_started = False
+        self.waiting_time = 0
 
     def get_arrival_time(self):
         return self.arrival_time
@@ -16,20 +17,20 @@ class Process:
     def get_burst_time(self):
         return self.burst_time
 
-    def update_burst_time(self, time):
-        return self.burst_time - time
-
-    def update_priority(self, priority):
-        if priority < 100:
-            self.time_slot = float((140 - priority) * 0.02)  # In Milliseconds
-        else:
-            self.time_slot = float((140 - priority) * 0.005)  # In Milliseconds
+    def update_burst_time(self, time, endTime):
+        self.burst_time -= time
+        if self.burst_time <= 0:
+            print self.name + " has finished running at " + str(endTime)
 
     def get_timeslot(self):
-        return self.time_slot
+        if self.priority < 100:
+            time_slot = float((140 - self.priority) * 0.02)  # In Milliseconds
+        else:
+            time_slot = float((140 - self.priority) * 0.005)  # In Milliseconds
+        return time_slot
 
-    def update_priority(self, waiting_time, time_now, arrival_time):
-        bonus = ceil(10 * waiting_time / (time_now - arrival_time))
+    def update_priority(self, time_now):
+        bonus = ceil(10 * self.waiting_time / (time_now - self.arrival_time))
         self.priority = max(100, min(self.get_priority() - bonus + 5, 139))
 
     def get_priority(self):

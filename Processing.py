@@ -1,12 +1,6 @@
-import os
 import threading
 import time
 
-from Process import Process
-from Queue import Queue
-
-Q1 = Queue()
-Q2 = Queue()
 
 
 class ProcessThread(threading.Thread):
@@ -15,20 +9,21 @@ class ProcessThread(threading.Thread):
         self.process = process_object
         self.process_name = process_object.get_name()
         self.paused = False
+        self.hasStarted = False
         self.pause_cond = threading.Condition(threading.Lock())
 
-    def pause(self):
+    def pause(self, pauseTime):
         self.paused = True
         self.pause_cond.acquire()
+        print self.process_name + " process has paused at " + str(pauseTime)
 
-    def resume(self):
+    def resume(self, resumeTime):
         self.paused = False
         self.pause_cond.release()
+        print self.process_name + " process has resumed at " + str(resumeTime)
 
-    def run(self):
-        # Each process prints its name for 5 times
-        for i in range(0, 5, 1):
-            self.pause_cond.acquire()
-            print "Printing %s" % self.process_name
-            time.sleep(1)
-            self.pause_cond.release()
+    def start(self, startTime):
+        print self.process_name + " process has started at " + str(startTime)
+        super(ProcessThread, self).start()
+
+        self.hasStarted = True
