@@ -66,7 +66,14 @@ class SchedulerThread(threading.Thread):
                         self.expired_queue.enqueue_process(process_thread_list[i])
                         process_thread_list[i].process.has_started = True
                         print process_thread_list[i].process_name + " arrived at " + str(default_timer() - start_time)
-                        #    <--------------------------NEED TO SORT LISTS
+                        sorted_list_of_priorities = sorted([x.process.get_priority() for x in process_thread_list])
+                        # Get Process from priority
+                        
+                        # temp_process_list = []
+                        # for x in sorted_list_of_priorities:
+                        #     temp_process_list.append()
+                        # process_thread_list = temp_process_list
+
                 self.swap()
 
                 while len(self.active_queue.items) != 0:

@@ -13,7 +13,7 @@ class Q:
         return self.items == []
 
     def enqueue_process(self, item):
-        self.items.append(item)
+        return self.items.append(item)
 
     def de_queue(self, item):
         return self.items.remove(item)
