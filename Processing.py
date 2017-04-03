@@ -1,6 +1,4 @@
 import threading
-import time
-
 
 
 class ProcessThread(threading.Thread):
@@ -12,18 +10,17 @@ class ProcessThread(threading.Thread):
         self.hasStarted = False
         self.pause_cond = threading.Condition(threading.Lock())
 
-    def pause(self, pauseTime):
+    def pause(self, pause_time):
         self.paused = True
         self.pause_cond.acquire()
-        print self.process_name + " process has paused at " + str(pauseTime)
+        print str(self.process_name) + " process has paused at " + str(pause_time)
 
-    def resume(self, resumeTime):
+    def resume(self, resume_time):
         self.paused = False
         self.pause_cond.release()
-        print self.process_name + " process has resumed at " + str(resumeTime)
+        print str(self.process_name) + " process has resumed at " + str(resume_time)
 
-    def start(self, startTime):
-        print self.process_name + " process has started at " + str(startTime)
+    def start(self, start_time):
+        print str(self.process_name) + " process has started at " + str(start_time)
         super(ProcessThread, self).start()
-
         self.hasStarted = True
