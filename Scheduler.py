@@ -43,8 +43,8 @@ class SchedulerThread(threading.Thread):
         if len(self.active_queue.items) == 0 and len(self.expired_queue.items) != 0:  # swaps queues
             self.expired_queue.items.sort(key=lambda process: process.priority)
             self.active_queue.items, self.expired_queue.items = self.expired_queue.items, self.active_queue.items
-            print "active queue: " + str(self.active_queue.items)
-            print "expired queue: " + str(self.expired_queue.items)
+            # print "active queue: " + str(self.active_queue.items)
+            # print "expired queue: " + str(self.expired_queue.items)
 
     def run(self):
         process_length = len(p_list)
@@ -111,7 +111,7 @@ class SchedulerThread(threading.Thread):
                                                                            default_timer() - start_time))  # updates burst time
                             if self.active_queue.items[0].iteration == 2:
                                 self.active_queue.items[0].iteration = 0
-                                self.active_queue.items[0].update_priority(default_timer())
+                                self.active_queue.items[0].update_priority(default_timer() - start_time)
                             self.expired_queue.enqueue_process(
                                 self.active_queue.getItem(0))  # adds the process into expired queue
                             self.active_queue.pop()  # pops the first element in the queue

@@ -33,10 +33,11 @@ class Process(threading.Thread):
             time_slot = float((140 - self.priority) * 0.005)  # In Milliseconds
         return time_slot
 
-    def update_priority(self, time_now):
-        self.waiting_time = (time_now - self.arrival_time) - (self.original_burst_time - self.burst_time)
+    def update_priority(self, time_now, ):
+        self.waiting_time = round((time_now - self.arrival_time) - (self.original_burst_time - self.burst_time),2)
         bonus = ceil(10 * self.waiting_time / (time_now - self.arrival_time))
         self.priority = max(100, min(self.get_priority() - bonus + 5, 139))
+        print "Time " + str(time_now) + ", " + self.name + ", priority updated to " + str(self.priority)
 
     def get_priority(self):
         return self.priority
