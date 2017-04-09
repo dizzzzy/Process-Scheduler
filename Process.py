@@ -53,22 +53,23 @@ class Process(threading.Thread):
         return self if self.pid == pid else None
 
     def pause(self, pauseTime, bool):
+        self.pause_cond.release()
         if bool == 0:
             self.paused = True
-            # self.pause_cond.acquire()
             print self.name + " process has paused at " + str(pauseTime)
         else:
             print self.name + " process has terminated at " + str(pauseTime)
 
     def resume(self, resumeTime):
+        self.pause_cond.acquire()
         self.paused = False
-        # self.pause_cond.release()
         if self.get_timeslot() >= self.burst_time:
             print self.name + " process has resumed at " + str(resumeTime) + ". Granted " + str(self.burst_time)
         else:
             print self.name + " process has resumed at " + str(resumeTime) + ". Granted " + str(self.get_timeslot())
 
     def start(self, startTime):
+        self.pause_cond.acquire()
         print self.name + " process has started at " + str(startTime)
         super(Process, self).start()
         self.has_started = True
