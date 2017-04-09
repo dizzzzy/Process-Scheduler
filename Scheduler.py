@@ -2,6 +2,9 @@ import threading
 
 import time
 import sched
+
+import operator
+
 from Process import Process
 from Processing import ProcessThread
 from Q import Q
@@ -42,11 +45,14 @@ class SchedulerThread(threading.Thread):
         self.active_queue = Q1
         self.expired_queue = Q2
 
-    def swap(self):
+    def swap_and_sort(self):
         if len(self.active_queue.items) == 0 and len(self.expired_queue.items) != 0:  # swaps queues
             self.active_queue.items, self.expired_queue.items = self.expired_queue.items, self.active_queue.items
-            # print "active queue: " + str(self.active_queue.items)
-            # print "expired queue: " + str(self.expired_queue.items)
+            priority_list = [x.get_processes_priority() for x in self.active_queue.items]
+            neww = zip(self.active_queue.items, priority_list)  # Zips processes with their ids
+            self.active_queue.items = [x for x, y in sorted(neww, key=operator.itemgetter(1))]  # Updates processes with priorities
+            print "Active queue: " + str(self.active_queue.items)
+            print "Expired queue: " + str(self.expired_queue.items)
 
     def run(self):
         process_length = len(p_list)
@@ -68,13 +74,13 @@ class SchedulerThread(threading.Thread):
                         print process_thread_list[i].process_name + " arrived at " + str(default_timer() - start_time)
                         sorted_list_of_priorities = sorted([x.process.get_priority() for x in process_thread_list])
                         # Get Process from priority
-                        
+
                         # temp_process_list = []
                         # for x in sorted_list_of_priorities:
                         #     temp_process_list.append()
                         # process_thread_list = temp_process_list
 
-                self.swap()
+                self.swap_and_sort()
 
                 while len(self.active_queue.items) != 0:
                     if self.active_queue.getItem(0).process.get_burst_time() > 0:
